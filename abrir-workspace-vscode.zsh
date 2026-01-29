@@ -1,33 +1,46 @@
 #!/usr/bin/env zsh
 
-# Sai no primeiro erro e trata variáveis não definidas
+# ---------------------------------
+# Nome: abrir-workspace-vscode.zsh
+# Versão: 2.2
+# Autor: Jeann Andrade
+# Descrição: Abre workspaces do VS Code via menu numerado
+# ---------------------------------
+
 set -e
 set -u
 
 # Verifica se o comando 'code' existe
 if ! command -v code >/dev/null 2>&1; then
-  echo "❌ Erro: o comando 'code' (VS Code) não está disponível no PATH."
-  echo "👉 No VS Code: 'Shell Command: Install code command in PATH'"
+  echo "❌ Erro: o comando 'code' não está disponível no PATH."
   exit 1
 fi
 
 # ==============================
-# LISTA DE WORKSPACES
+# ORDEM DO MENU (ARRAY ZSH → 1-based)
 # ==============================
 
-typeset -A WORKSPACES=(
-  notes  "$HOME/repo/github/jeannandrade.github.io/jeannandrade.github.io.code-workspace"
-  scripts  "$HOME/bin/myscripts.code-workspace"
-  blazor  "$HOME/repo/github/Learning-Blazor/Learning-Blazor.code-workspace"
-  zshrc  "$HOME/.zshrc"
+IDS=(
+  notes
+  scripts
+  blazor
+  zshrc
 )
 
 # ==============================
-# GERAR MENU NUMERADO
+# MAPA ID -> WORKSPACE
 # ==============================
 
-# Array auxiliar para manter a ordem do menu
-IDS=(${(k)WORKSPACES})
+typeset -A WORKSPACES=(
+  notes   "$HOME/repo/github/jeannandrade.github.io/jeannandrade.github.io.code-workspace"
+  scripts "$HOME/bin/myscripts.code-workspace"
+  blazor  "$HOME/repo/github/Learning-Blazor/Learning-Blazor.code-workspace"
+  zshrc   "$HOME/.zshrc"
+)
+
+# ==============================
+# MENU NUMERADO
+# ==============================
 
 echo "📂 Workspaces disponíveis:"
 echo "--------------------------"
@@ -42,7 +55,7 @@ echo
 read "?👉 Digite o número do workspace que deseja abrir: " OPCAO
 
 # ==============================
-# VALIDAÇÃO DA OPÇÃO
+# VALIDAÇÃO
 # ==============================
 
 if [[ ! "$OPCAO" =~ '^[0-9]+$' ]]; then
@@ -55,12 +68,12 @@ if (( OPCAO < 1 || OPCAO > ${#IDS[@]} )); then
   exit 1
 fi
 
-# Ajuste de índice (menu começa em 1)
-SELECIONADO_ID="${IDS[$((OPCAO - 1))]}"
+# ✅ CORREÇÃO AQUI (SEM -1)
+SELECIONADO_ID="${IDS[$OPCAO]}"
 WORKSPACE_PATH="${WORKSPACES[$SELECIONADO_ID]}"
 
-if [[ ! -d "$WORKSPACE_PATH" ]]; then
-  echo "❌ Erro: o caminho '$WORKSPACE_PATH' não existe."
+if [[ ! -e "$WORKSPACE_PATH" ]]; then
+  echo "❌ Erro: o path '$WORKSPACE_PATH' não existe."
   exit 1
 fi
 
