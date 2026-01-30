@@ -24,6 +24,7 @@ IDS=(
   notes
   scripts
   blazor
+  lumia
   zshrc
 )
 
@@ -35,6 +36,7 @@ typeset -A WORKSPACES=(
   notes   "$HOME/repo/github/jeannandrade.github.io/jeannandrade.github.io.code-workspace"
   scripts "$HOME/bin/myscripts.code-workspace"
   blazor  "$HOME/repo/github/Learning-Blazor/Learning-Blazor.code-workspace"
+  lumia   "$HOME/repo/github/Lumia.Foundation/Lumia.Foundation.code-workspace
   zshrc   "$HOME/.zshrc"
 )
 
