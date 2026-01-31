@@ -67,3 +67,7 @@ done
 
 echo ""
 echo "✅ Atualização de pacotes concluída com sucesso."
+
+dotnet restore
+dotnet build
+
