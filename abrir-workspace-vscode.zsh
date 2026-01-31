@@ -21,10 +21,11 @@ fi
 # ==============================
 
 IDS=(
-  notes
-  scripts
-  blazor
-  lumia
+  JeannandradeGithub
+  myscripts
+  Vault
+  LearningBlazor
+  LumiaFoundation
   zshrc
 )
 
@@ -33,11 +34,12 @@ IDS=(
 # ==============================
 
 typeset -A WORKSPACES=(
-  notes   "$HOME/repo/github/jeannandrade.github.io/jeannandrade.github.io.code-workspace"
-  scripts "$HOME/bin/myscripts.code-workspace"
-  blazor  "$HOME/repo/github/Learning-Blazor/Learning-Blazor.code-workspace"
-  lumia   "$HOME/repo/github/Lumia.Foundation/Lumia.Foundation.code-workspace
-  zshrc   "$HOME/.zshrc"
+  JeannandradeGithub "$HOME/repo/github/jeannandrade.github.io/jeannandrade.github.io.code-workspace"
+  myscripts "$HOME/bin/myscripts.code-workspace"
+  Vault "$HOME/repo/github/Vault/Vault.code-workspace"
+  LearningBlazor "$HOME/repo/github/Learning-Blazor/Learning-Blazor.code-workspace"
+  LumiaFoundation "$HOME/repo/github/Lumia.Foundation/Lumia.Foundation.code-workspace"
+  zshrc "$HOME/.zshrc"
 )
 
 # ==============================
