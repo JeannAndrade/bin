@@ -38,6 +38,13 @@ fi
 
 echo "${GREEN}Projeto encontrado:${NC} $csproj_file"
 
+# Limpa a pasta de saída antes de empacotar
+if [[ -d "nupkgs" ]]; then
+  echo "${CYAN}Limpando pasta nupkgs...${NC}"
+  rm -rf nupkgs
+fi
+mkdir -p nupkgs
+
 # Executa o dotnet pack
 echo "${CYAN}Executando:${NC} dotnet pack \"$csproj_file\" --include-symbols --output nupkgs"
 echo ""
