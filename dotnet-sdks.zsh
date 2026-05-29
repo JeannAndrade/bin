@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 clear
 
 # Verifica se o dotnet está disponível
