@@ -35,11 +35,28 @@ if ! command -v dotnet >/dev/null 2>&1; then
   exit 1
 fi
 
+# Descobre a versão do SDK em uso
+SDK_VERSION=$(dotnet --version)
+
+if [[ -z "$SDK_VERSION" ]]; then
+  echo "❌ Erro: não foi possível identificar a versão do SDK."
+  exit 1
+fi
+
+SDK_MAJOR=${SDK_VERSION%%.*}
+FRAMEWORK="net${SDK_MAJOR}.0"
+
+echo "SDK encontrado: $SDK_VERSION"
+echo "Framework: $FRAMEWORK"
+echo
+
 echo
 echo "✅ Criando solução '$solution_name' com projeto '$project_name'..."
 
 # Cria o global.json com a versão do SDK
-dotnet new globaljson --sdk-version 10.0.100 --output "$solution_name"
+dotnet new globaljson \
+  --sdk-version "$SDK_VERSION" \
+  --output "$solution_name"
 
 # Cria a solução
 dotnet new sln -o "$solution_name"
@@ -48,7 +65,7 @@ dotnet new sln -o "$solution_name"
 dotnet new blazor \
   --name "$project_name" \
   --output "$solution_name" \
-  --framework net10.0 \
+  --framework "$FRAMEWORK" \
   --interactivity Auto \
   --auth None \
   --all-interactive false
