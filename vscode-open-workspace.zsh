@@ -25,6 +25,7 @@ IDS=(
   myscripts
   Vault
   LearningBlazor
+  LearningCSharp
   LumiaFoundation
   zshrc
 )
@@ -38,6 +39,7 @@ typeset -A WORKSPACES=(
   myscripts "$HOME/bin/myscripts.code-workspace"
   Vault "$HOME/repo/github/Vault/Vault.code-workspace"
   LearningBlazor "$HOME/repo/github/Learning-Blazor/Learning-Blazor.code-workspace"
+  LearningCSharp "$HOME/repo/github/Learning-CSharp/Learning-CSharp.code-workspace"
   LumiaFoundation "$HOME/repo/github/Lumia.Foundation/Lumia.Foundation.code-workspace"
   zshrc "$HOME/.zshrc"
 )
