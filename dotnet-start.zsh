@@ -4,21 +4,24 @@
 set -euo pipefail
 clear
 
-lib="$(dirname "$0")/shared-style.zsh"
-if [[ ! -f "$lib" ]]; then
-  echo "Erro: arquivo de biblioteca '$lib' não encontrado." >&2
+style_lib="$(dirname "$0")/shared-style.zsh"
+if [[ ! -f "$style_lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$style_lib' não encontrado." >&2
   exit 1
 fi
-source "$lib"
+source "$style_lib"
 
-# Verifica se o dotnet está disponível
-if ! command -v dotnet &>/dev/null; then
-  err "O comando 'dotnet' não foi encontrado."
-  info "Instale o .NET SDK em: https://dotnet.microsoft.com/download"
+common_lib="$(dirname "$0")/dotnet-common.zsh"
+if [[ ! -f "$common_lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$common_lib' não encontrado." >&2
   exit 1
 fi
+source "$common_lib"
 
-info "dotnet SDK encontrado: $(dotnet --version)"
+# ---------------------------------------------------------------------------
+# Validação: dotnet disponível
+# ---------------------------------------------------------------------------
+check_dotnet
 
 # Busca por arquivos .csproj na pasta atual e subpastas
 projects=()

@@ -1,4 +1,5 @@
-#!/usr/bin/env zsh
+# Este arquivo não é executável diretamente.
+# Carregue-o via: source "$(dirname "$0")/shared-style.zsh"
 
 # Definições de cores usadas no script (fallback quando não for TTY)
 if [[ -t 1 ]]; then

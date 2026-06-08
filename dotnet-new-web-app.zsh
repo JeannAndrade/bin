@@ -4,12 +4,24 @@
 set -euo pipefail
 clear
 
-lib="$(dirname "$0")/shared-style.zsh"
-if [[ ! -f "$lib" ]]; then
-  echo "Erro: arquivo de biblioteca '$lib' não encontrado." >&2
+style_lib="$(dirname "$0")/shared-style.zsh"
+if [[ ! -f "$style_lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$style_lib' não encontrado." >&2
   exit 1
 fi
-source "$lib"
+source "$style_lib"
+
+common_lib="$(dirname "$0")/dotnet-common.zsh"
+if [[ ! -f "$common_lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$common_lib' não encontrado." >&2
+  exit 1
+fi
+source "$common_lib"
+
+# ---------------------------------------------------------------------------
+# Validação: dotnet disponível
+# ---------------------------------------------------------------------------
+check_dotnet
 
 # =========================
 # Leitura dos parâmetros
@@ -51,31 +63,11 @@ if [[ -z "$PROJECT" ]]; then
 fi
 
 # =========================
-# Validação do .NET
-# =========================
-
-if ! command -v dotnet >/dev/null 2>&1; then
-    err ".NET SDK não encontrado."
-    exit 1
-fi
-
-# =========================
 # Descobre SDK mais recente
 # =========================
 
-SDK_VERSION=$(dotnet --version)
-
-if [[ -z "$SDK_VERSION" ]]; then
-    err "Não foi possível identificar a versão do SDK."
-    exit 1
-fi
-
-# Exemplo:
-# 10.0.108 -> net10.0
-SDK_MAJOR=$(echo "$SDK_VERSION" | cut -d'.' -f1)
-SDK_MINOR=$(echo "$SDK_VERSION" | cut -d'.' -f2)
-
-FRAMEWORK="net${SDK_MAJOR}.${SDK_MINOR}"
+SDK_VERSION=$(get_sdk_version)
+FRAMEWORK=$(framework_from_sdk "$SDK_VERSION" "major_minor")
 
 PROJECT_PATH="${SOLUTION}/${PROJECT}"
 

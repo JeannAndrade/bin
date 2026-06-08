@@ -4,12 +4,24 @@
 set -euo pipefail
 clear
 
-lib="$(dirname "$0")/shared-style.zsh"
-if [[ ! -f "$lib" ]]; then
-  echo "Erro: arquivo de biblioteca '$lib' não encontrado." >&2
+style_lib="$(dirname "$0")/shared-style.zsh"
+if [[ ! -f "$style_lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$style_lib' não encontrado." >&2
   exit 1
 fi
-source "$lib"
+source "$style_lib"
+
+common_lib="$(dirname "$0")/dotnet-common.zsh"
+if [[ ! -f "$common_lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$common_lib' não encontrado." >&2
+  exit 1
+fi
+source "$common_lib"
+
+# ---------------------------------------------------------------------------
+# Validação: dotnet disponível
+# ---------------------------------------------------------------------------
+check_dotnet
 
 info "=== Criador de Projeto Blazor (.NET) ==="
 
@@ -33,23 +45,9 @@ if [[ -z "$project_name" ]]; then
   exit 1
 fi
 
-# Verifica se o dotnet está instalado
-if ! command -v dotnet >/dev/null 2>&1; then
-  err "O comando 'dotnet' não foi encontrado."
-  info "Instale o .NET SDK antes de continuar."
-  exit 1
-fi
-
 # Descobre a versão do SDK em uso
-SDK_VERSION=$(dotnet --version)
-
-if [[ -z "$SDK_VERSION" ]]; then
-  err "Não foi possível identificar a versão do SDK."
-  exit 1
-fi
-
-SDK_MAJOR=${SDK_VERSION%%.*}
-FRAMEWORK="net${SDK_MAJOR}.0"
+SDK_VERSION=$(get_sdk_version)
+FRAMEWORK=$(framework_from_sdk "$SDK_VERSION" "major_zero")
 
 info "SDK encontrado: $SDK_VERSION"
 info "Framework: $FRAMEWORK"

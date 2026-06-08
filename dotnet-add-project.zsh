@@ -4,66 +4,33 @@
 set -euo pipefail
 clear
 
-lib="$(dirname "$0")/shared-style.zsh"
-if [[ ! -f "$lib" ]]; then
-  echo "Erro: arquivo de biblioteca '$lib' não encontrado." >&2
+style_lib="$(dirname "$0")/shared-style.zsh"
+if [[ ! -f "$style_lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$style_lib' não encontrado." >&2
   exit 1
 fi
-source "$lib"
+source "$style_lib"
+
+common_lib="$(dirname "$0")/dotnet-common.zsh"
+if [[ ! -f "$common_lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$common_lib' não encontrado." >&2
+  exit 1
+fi
+source "$common_lib"
 
 # ---------------------------------------------------------------------------
 # Validação: dotnet disponível
 # ---------------------------------------------------------------------------
-if ! command -v dotnet &>/dev/null; then
-  err "O comando 'dotnet' não foi encontrado."
-  info "Instale o .NET SDK em: https://dotnet.microsoft.com/download"
-  exit 1
-fi
+check_dotnet
 
-info "dotnet SDK encontrado: $(dotnet --version)"
-
-# ---------------------------------------------------------------------------
-# Validação: arquivo .slnx na pasta atual
-# ---------------------------------------------------------------------------
-slnx_files=(*.slnx(N))
-
-if [ ${#slnx_files[@]} -eq 0 ]; then
-  err "Nenhum arquivo .slnx encontrado na pasta atual."
-  info "Execute este script na raiz de uma solution .NET."
-  exit 1
-fi
-
-if [ ${#slnx_files[@]} -gt 1 ]; then
-  err "Mais de um arquivo .slnx encontrado na pasta atual:"
-  for f in "${slnx_files[@]}"; do
-    echo "  - $f"
-  done
-  info "Certifique-se de que existe apenas uma solution neste diretório."
-  exit 1
-fi
-
-nome_solucao="${slnx_files[1]}"
+nome_solucao=$(require_single_glob "*.slnx" \
+  "Nenhum arquivo .slnx encontrado na pasta atual." \
+  "Mais de um arquivo .slnx encontrado na pasta atual:")
 info "Solution encontrada: $nome_solucao"
 
-# ---------------------------------------------------------------------------
-# Validação: global.json e detecção do framework
-# ---------------------------------------------------------------------------
-if [ ! -f global.json ]; then
-  err "Arquivo global.json não encontrado na pasta atual."
-  info "O global.json é necessário para identificar a versão do framework."
-  exit 1
-fi
-
-sdk_version=$(grep -oE '"version"\s*:\s*"[^"]+"' global.json | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-
-if [ -z "$sdk_version" ]; then
-  err "Não foi possível extrair a versão do SDK do global.json."
-  info "Verifique se o arquivo possui o campo: { \"sdk\": { \"version\": \"x.y.z\" } }"
-  exit 1
-fi
-
-major_version=$(echo "$sdk_version" | cut -d. -f1)
-framework="net${major_version}.0"
+require_file global.json "Arquivo global.json não encontrado na pasta atual."
+sdk_version=$(extract_sdk_from_global_json global.json)
+framework=$(framework_from_sdk "$sdk_version" "major_zero")
 
 info "Framework detectado: $framework (SDK $sdk_version)"
 

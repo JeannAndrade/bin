@@ -4,42 +4,27 @@
 set -euo pipefail
 clear
 
-# =============================================================================
-# dotnet-publish-package.zsh
-# Empacota um projeto .NET com symbols.
-# Uso: ./dotnet-publish-package.zsh <nome-do-projeto>
-# =============================================================================
-
-lib="$(dirname "$0")/shared-style.zsh"
-if [[ ! -f "$lib" ]]; then
-  echo "Erro: arquivo de biblioteca '$lib' não encontrado." >&2
+style_lib="$(dirname "$0")/shared-style.zsh"
+if [[ ! -f "$style_lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$style_lib' não encontrado." >&2
   exit 1
 fi
-source "$lib"
+source "$style_lib"
 
-# Valida o parâmetro
-if [[ -z "$1" ]]; then
-  err "Informe o nome do projeto."
-  info "Uso: $0 <nome-do-projeto>"
+common_lib="$(dirname "$0")/dotnet-common.zsh"
+if [[ ! -f "$common_lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$common_lib' não encontrado." >&2
   exit 1
 fi
+source "$common_lib"
 
-# Verifica se o dotnet está disponível
-if ! command -v dotnet &>/dev/null; then
-  err "O comando 'dotnet' não foi encontrado."
-  info "Instale o .NET SDK em: https://dotnet.microsoft.com/download"
-  exit 1
-fi
+# ---------------------------------------------------------------------------
+# Validação: dotnet disponível
+# ---------------------------------------------------------------------------
+check_dotnet
 
-info "dotnet SDK encontrado: $(dotnet --version)"
-
-# Pesquisa pelo arquivo .csproj na pasta local e subpastas
-csproj_file=$(find . -type f -name "${1}.csproj" 2>/dev/null | head -n 1)
-
-if [[ -z "$csproj_file" ]]; then
-  err "Arquivo '${1}.csproj' não encontrado."
-  exit 1
-fi
+require_non_empty "${1:-}" "Informe o nome do projeto."
+csproj_file=$(find_csproj_by_name "$1")
 
 success "Projeto encontrado: $csproj_file"
 

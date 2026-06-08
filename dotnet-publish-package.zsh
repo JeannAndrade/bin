@@ -4,43 +4,27 @@
 set -euo pipefail
 clear
 
-# =============================================================================
-# dotnet-publish-package2.zsh
-# Publica o pacote .nupkg mais recente da pasta nupkgs no NuGet.
-# Uso: ./dotnet-publish-package2.zsh
-# =============================================================================
-
-lib="$(dirname "$0")/shared-style.zsh"
-if [[ ! -f "$lib" ]]; then
-  echo "Erro: arquivo de biblioteca '$lib' não encontrado." >&2
+style_lib="$(dirname "$0")/shared-style.zsh"
+if [[ ! -f "$style_lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$style_lib' não encontrado." >&2
   exit 1
 fi
-source "$lib"
+source "$style_lib"
 
-# Verifica se o dotnet está disponível
-if ! command -v dotnet &>/dev/null; then
-  err "O comando 'dotnet' não foi encontrado."
-  info "Instale o .NET SDK em: https://dotnet.microsoft.com/download"
+common_lib="$(dirname "$0")/dotnet-common.zsh"
+if [[ ! -f "$common_lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$common_lib' não encontrado." >&2
   exit 1
 fi
+source "$common_lib"
 
-info "dotnet SDK encontrado: $(dotnet --version)"
+# ---------------------------------------------------------------------------
+# Validação: dotnet disponível
+# ---------------------------------------------------------------------------
+check_dotnet
 
-# Verifica se a pasta nupkgs existe
-if [[ ! -d "nupkgs" ]]; then
-  err "Pasta 'nupkgs' não encontrada."
-  info "Execute o dotnet-pack-package.zsh antes deste script."
-  exit 1
-fi
-
-# Recupera o .nupkg mais recente (exclui .symbols.nupkg)
-nupkg_file=$(find nupkgs -maxdepth 1 -type f -name "*.nupkg" ! -name "*.symbols.nupkg" \
-  -print0 | xargs -0 ls -t 2>/dev/null | head -n 1)
-
-if [[ -z "$nupkg_file" ]]; then
-  err "Nenhum arquivo .nupkg encontrado em ./nupkgs"
-  exit 1
-fi
+require_dir "nupkgs" "Pasta 'nupkgs' não encontrada."
+nupkg_file=$(find_latest_nupkg)
 
 success "Pacote encontrado: $nupkg_file"
 

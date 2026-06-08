@@ -18,11 +18,15 @@ if [[ ! -f "$lib" ]]; then
 fi
 source "$lib"
 
-# Verifica se o comando 'code' existe
-if ! command -v code >/dev/null 2>&1; then
-  err "o comando 'code' não está disponível no PATH."
+common_lib="$(dirname "$0")/dotnet-common.zsh"
+if [[ ! -f "$common_lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$common_lib' não encontrado." >&2
   exit 1
 fi
+source "$common_lib"
+
+# Verifica se o comando 'code' existe
+require_command code "o comando 'code' não está disponível no PATH."
 
 # ==============================
 # ORDEM DO MENU (ARRAY ZSH → 1-based)
