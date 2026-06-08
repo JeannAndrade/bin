@@ -7,12 +7,35 @@
 # Descrição: Abre workspaces do VS Code via menu numerado
 # ---------------------------------
 
-set -e
-set -u
+# Sai imediatamente se algum comando falhar e Trata variáveis não definidas como erro
+set -euo pipefail
+
+# --- Cores para output ---
+if [[ -t 1 ]]; then
+  BOLD='\033[1m'
+  RED='\033[0;31m'
+  YELLOW='\033[0;33m'
+  GREEN='\033[0;32m'
+  CYAN='\033[0;36m'
+  NC='\033[0m'
+else
+  BOLD=''
+  RED=''
+  YELLOW=''
+  GREEN=''
+  CYAN=''
+  NC=''
+fi
+
+# Helpers para mensagens padronizadas
+err() { echo "${RED}${BOLD}Erro:${NC} $*"; }
+warn() { echo "${YELLOW}Aviso:${NC} $*"; }
+info() { echo "${CYAN}Info:${NC} $*"; }
+success() { echo "${GREEN}$*${NC}"; }
 
 # Verifica se o comando 'code' existe
 if ! command -v code >/dev/null 2>&1; then
-  echo "❌ Erro: o comando 'code' não está disponível no PATH."
+  err "o comando 'code' não está disponível no PATH."
   exit 1
 fi
 
@@ -35,51 +58,52 @@ IDS=(
 # ==============================
 
 typeset -A WORKSPACES=(
-  JeannandradeGithub "$HOME/repo/github/jeannandrade.github.io/jeannandrade.github.io.code-workspace"
-  myscripts "$HOME/bin/myscripts.code-workspace"
-  Vault "$HOME/repo/github/Vault/Vault.code-workspace"
-  LearningBlazor "$HOME/repo/github/Learning-Blazor/Learning-Blazor.code-workspace"
-  LearningCSharp "$HOME/repo/github/Learning-CSharp/Learning-CSharp.code-workspace"
-  LumiaFoundation "$HOME/repo/github/Lumia.Foundation/Lumia.Foundation.code-workspace"
-  zshrc "$HOME/.zshrc"
+  [JeannandradeGithub]="$HOME/repo/github/jeannandrade.github.io/jeannandrade.github.io.code-workspace"
+  [myscripts]="$HOME/bin/myscripts.code-workspace"
+  [Vault]="$HOME/repo/github/Vault/Vault.code-workspace"
+  [LearningBlazor]="$HOME/repo/github/Learning-Blazor/Learning-Blazor.code-workspace"
+  [LearningCSharp]="$HOME/repo/github/Learning-CSharp/Learning-CSharp.code-workspace"
+  [LumiaFoundation]="$HOME/repo/github/Lumia.Foundation/Lumia.Foundation.code-workspace"
+  [zshrc]="$HOME/.zshrc"
 )
 
 # ==============================
 # MENU NUMERADO
 # ==============================
 
-echo "📂 Workspaces disponíveis:"
-echo "--------------------------"
+info "Workspaces disponíveis:"
+info "--------------------------"
 
 i=1
-for id in $IDS; do
+for id in "${IDS[@]}"; do
   echo " $i) $id"
   ((i++))
 done
 
 echo
-read "?👉 Digite o número do workspace que deseja abrir: " OPCAO
+printf "Digite o número do workspace que deseja abrir: "
+read -r OPCAO
 
 # ==============================
 # VALIDAÇÃO
 # ==============================
 
-if [[ ! "$OPCAO" =~ '^[0-9]+$' ]]; then
-  echo "❌ Erro: digite apenas números."
+if [[ ! "$OPCAO" =~ ^[0-9]+$ ]]; then
+  err "Digite apenas números."
   exit 1
 fi
 
 if (( OPCAO < 1 || OPCAO > ${#IDS[@]} )); then
-  echo "❌ Erro: opção inválida."
+  err "Opção inválida."
   exit 1
 fi
 
-# ✅ CORREÇÃO AQUI (SEM -1)
+# CORREÇÃO AQUI (SEM -1)
 SELECIONADO_ID="${IDS[$OPCAO]}"
 WORKSPACE_PATH="${WORKSPACES[$SELECIONADO_ID]}"
 
 if [[ ! -e "$WORKSPACE_PATH" ]]; then
-  echo "❌ Erro: o path '$WORKSPACE_PATH' não existe."
+  err "O path '$WORKSPACE_PATH' não existe."
   exit 1
 fi
 
@@ -87,5 +111,5 @@ fi
 # ABRIR VS CODE
 # ==============================
 
-echo "🚀 Abrindo workspace '$SELECIONADO_ID'..."
+info "Abrindo workspace '$SELECIONADO_ID'..."
 code "$WORKSPACE_PATH"

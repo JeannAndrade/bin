@@ -1,23 +1,47 @@
 #!/usr/bin/env zsh
-set -e
-set -u
+
+# Sai imediatamente se algum comando falhar e Trata variáveis não definidas como erro
+set -euo pipefail
+
+# --- Cores para output ---
+if [[ -t 1 ]]; then
+  BOLD='\033[1m'
+  RED='\033[0;31m'
+  YELLOW='\033[0;33m'
+  GREEN='\033[0;32m'
+  CYAN='\033[0;36m'
+  NC='\033[0m'
+else
+  BOLD=''
+  RED=''
+  YELLOW=''
+  GREEN=''
+  CYAN=''
+  NC=''
+fi
+
+# Helpers para mensagens padronizadas
+err() { echo "${RED}${BOLD}Erro:${NC} $*"; }
+warn() { echo "${YELLOW}Aviso:${NC} $*"; }
+info() { echo "${CYAN}Info:${NC} $*"; }
+success() { echo "${GREEN}$*${NC}"; }
 
 # Verifica se o dotnet está disponível
 if ! command -v dotnet >/dev/null 2>&1; then
-  echo "❌ Erro: dotnet CLI não encontrado."
+  err "dotnet CLI não encontrado."
   exit 1
 fi
 
-echo "▶ Buscando pacotes desatualizados..."
+info "Buscando pacotes desatualizados..."
 echo ""
 
 projeto=""
 comandos=()
 
 # Captura stdout + stderr
-dotnet list package --outdated 2>&1 | while IFS= read -r linha; do
-  # Remove espaços à esquerda
-  linha=$(echo "$linha" | sed 's/^[[:space:]]*//')
+while IFS= read -r linha; do
+  # Remove espaços à esquerda (trim leading whitespace)
+  linha="${linha#"${linha%%[![:space:]]*}"}"
 
   # Detecta projeto
   if [[ "$linha" == Project* ]]; then
@@ -33,40 +57,40 @@ dotnet list package --outdated 2>&1 | while IFS= read -r linha; do
 
     comandos+=("dotnet add \"$projeto\" package \"$pacote\" --version $versao_latest")
   fi
-done
+done < <(dotnet list package --outdated 2>&1)
 
 # Se não houver comandos, sair
 if [[ ${#comandos[@]} -eq 0 ]]; then
-  echo "✅ Nenhum pacote desatualizado encontrado."
+  info "Nenhum pacote desatualizado encontrado."
   exit 0
 fi
 
-echo "📦 Os seguintes comandos serão executados:"
+info "Os seguintes comandos serão executados:"
 echo ""
 
 for cmd in "${comandos[@]}"; do
-  echo "  $cmd"
+  info "  $cmd"
 done
 
 echo ""
-read "resposta?Deseja executar esses comandos agora? (s/N): "
+printf "Deseja executar esses comandos agora? (s/N): "
+read -r resposta
 
 if [[ "$resposta" != "s" && "$resposta" != "S" ]]; then
-  echo "❌ Operação cancelada pelo usuário."
+  warn "Operação cancelada pelo usuário."
   exit 0
 fi
 
-echo ""
-echo "🚀 Executando atualizações..."
+info "Executando atualizações..."
 echo ""
 
 for cmd in "${comandos[@]}"; do
-  echo "▶ $cmd"
+  info "  $cmd"
   eval "$cmd"
 done
 
 echo ""
-echo "✅ Atualização de pacotes concluída com sucesso."
+success "Atualização de pacotes concluída com sucesso."
 
 dotnet restore
 dotnet build
