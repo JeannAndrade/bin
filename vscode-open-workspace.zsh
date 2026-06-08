@@ -7,31 +7,16 @@
 # Descrição: Abre workspaces do VS Code via menu numerado
 # ---------------------------------
 
-# Sai imediatamente se algum comando falhar e Trata variáveis não definidas como erro
+# Sai imediatamente se algum comando falhar e trata variáveis não definidas como erro
 set -euo pipefail
+clear
 
-# --- Cores para output ---
-if [[ -t 1 ]]; then
-  BOLD='\033[1m'
-  RED='\033[0;31m'
-  YELLOW='\033[0;33m'
-  GREEN='\033[0;32m'
-  CYAN='\033[0;36m'
-  NC='\033[0m'
-else
-  BOLD=''
-  RED=''
-  YELLOW=''
-  GREEN=''
-  CYAN=''
-  NC=''
+lib="$(dirname "$0")/shared-style.zsh"
+if [[ ! -f "$lib" ]]; then
+  echo "Erro: arquivo de biblioteca '$lib' não encontrado." >&2
+  exit 1
 fi
-
-# Helpers para mensagens padronizadas
-err() { echo "${RED}${BOLD}Erro:${NC} $*"; }
-warn() { echo "${YELLOW}Aviso:${NC} $*"; }
-info() { echo "${CYAN}Info:${NC} $*"; }
-success() { echo "${GREEN}$*${NC}"; }
+source "$lib"
 
 # Verifica se o comando 'code' existe
 if ! command -v code >/dev/null 2>&1; then
