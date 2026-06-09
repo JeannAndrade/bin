@@ -19,7 +19,7 @@ else
 fi
 
 # Helpers para mensagens padronizadas
-err()     { echo "${RED}${BOLD}Erro:${NC} $*"; }
+err() { echo "${RED}${BOLD}Erro:${NC} $*" >&2; }
 warn()    { echo "${YELLOW}Aviso:${NC} $*"; }
 info()    { echo "${CYAN}Info:${NC} $*"; }
 success() { echo "${GREEN}$*${NC}"; }

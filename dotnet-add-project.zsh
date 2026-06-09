@@ -1,7 +1,5 @@
 #!/usr/bin/env zsh
 
-# Sai imediatamente se algum comando falhar e trata variáveis não definidas como erro
-set -euo pipefail
 clear
 
 style_lib="$(dirname "$0")/shared-style.zsh"

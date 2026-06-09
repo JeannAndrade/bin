@@ -89,10 +89,15 @@ dotnet new web \
     --framework "$FRAMEWORK" \
     --output "$PROJECT_PATH"
 
+dotnet new xunit \
+    --framework "$FRAMEWORK" \
+    --output "$PROJECT_PATH.Tests"
+
 dotnet new sln \
     -o "$SOLUTION"
 
 dotnet sln "$SOLUTION" add "$PROJECT_PATH"
-
+dotnet sln "$SOLUTION" add "$PROJECT_PATH.Tests"
+dotnet add "$PROJECT_PATH.Tests" reference "$PROJECT_PATH"
 echo ""
 success "Projeto criado com sucesso."

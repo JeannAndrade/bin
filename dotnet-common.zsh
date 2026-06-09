@@ -76,26 +76,33 @@ require_dir() {
   fi
 }
 
-# Garante que exista exatamente um arquivo para um glob (ex: *.slnx)
+# Garante que exista exatamente um arquivo para um padrão (ex: *.slnx)
 # Imprime o caminho do arquivo encontrado
 require_single_glob() {
   local pattern="$1"
   local msg_zero="$2"
   local msg_many="$3"
-  local files
-  files=( $pattern(N) )
+  local files=()
+  local f
+
+  while IFS= read -r -d $'\0' f; do
+    files+=("$f")
+  done < <(find . -maxdepth 1 -type f -name "$pattern" -print0 2>/dev/null)
+
   if [[ ${#files[@]} -eq 0 ]]; then
     err "${msg_zero:-Nenhum arquivo encontrado para padrão: $pattern}"
     exit 1
   fi
+
   if [[ ${#files[@]} -gt 1 ]]; then
     err "${msg_many:-Mais de um arquivo encontrado para padrão: $pattern}"
     for f in "${files[@]}"; do
-      echo "  - $f"
+      echo "  - ${f#./}"
     done
     exit 1
   fi
-  printf "%s" "${files[1]}"
+
+  printf "%s" "${files[1]#./}"
 }
 
 # Procura por um .csproj com nome exato e retorna o caminho (ou falha)
