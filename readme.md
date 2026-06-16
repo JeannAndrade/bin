@@ -128,3 +128,12 @@ Contém definições de estilo e helpers para saída formatada nos scripts (core
 ## vscode-open-workspace.zsh - Abrir Workspace no VS Code
 
 Este script permite abrir workspaces do VS Code através de um menu numerado. Ele apresenta uma lista de workspaces pré-definidos (como notes, scripts, blazor, lumia e zshrc) e permite ao usuário selecionar um número correspondente para abrir o workspace ou arquivo no VS Code. O script valida a entrada e verifica se o comando 'code' está disponível.
+
+## Prompt para novos scripts
+
+Preciso que me ajude a criar um script zsh para visualizar a versão atual do Ubuntu que estou executando.
+Requisitos:
+- O script deve se chamar ubuntu-version.zsh
+- Importe e faça uso do script shared-style.zsh, onde já existem funções de formatação e estilo para os meus scripts.
+- Caso necessário, coloque novos blocos de script reutilizáveis no arquivo shared-style.zsh, para que sejam reutilizados futuramente.
+- Use o arquivo vscode-open-workspace.zsh como exemplo para este novo script.

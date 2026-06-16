@@ -23,3 +23,21 @@ err() { echo "${RED}${BOLD}Erro:${NC} $*" >&2; }
 warn()    { echo "${YELLOW}Aviso:${NC} $*"; }
 info()    { echo "${CYAN}Info:${NC} $*"; }
 success() { echo "${GREEN}$*${NC}"; }
+
+# Exibe um título de seção com separador
+# Uso: section_title "Título da Seção"
+section_title() {
+  local title="$*"
+  local sep="────────────────────────────"
+  echo
+  echo "${BOLD}${CYAN}${title}${NC}"
+  echo "${CYAN}${sep}${NC}"
+}
+
+# Exibe um par label: valor formatado
+# Uso: print_field "Label" "valor"
+print_field() {
+  local label="$1"
+  local value="$2"
+  printf "  ${BOLD}%-20s${NC} %s\n" "${label}:" "${value}"
+}
