@@ -41,3 +41,9 @@ print_field() {
   local value="$2"
   printf "  ${BOLD}%-20s${NC} %s\n" "${label}:" "${value}"
 }
+
+# Exibe um item de lista com marcador
+# Uso: print_list_item "Descrição do item"
+print_list_item() {
+  printf "  ${CYAN}•${NC} %s\n" "$*"
+}
