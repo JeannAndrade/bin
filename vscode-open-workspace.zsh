@@ -34,11 +34,12 @@ require_command code "o comando 'code' não está disponível no PATH."
 
 IDS=(
   JeannandradeGithub
-  myscripts
-  Vault
   LearningBlazor
   LearningCSharp
   LumiaFoundation
+  myscripts
+  MelhorPrecoCerveja
+  Vault
   zshrc
 )
 
@@ -53,6 +54,7 @@ typeset -A WORKSPACES=(
   [LearningBlazor]="$HOME/repo/github/Learning-Blazor/Learning-Blazor.code-workspace"
   [LearningCSharp]="$HOME/repo/github/Learning-CSharp/Learning-CSharp.code-workspace"
   [LumiaFoundation]="$HOME/repo/github/Lumia.Foundation/Lumia.Foundation.code-workspace"
+  [MelhorPrecoCerveja]="$HOME/repo/github/MelhorPrecoCerveja/MelhorPrecoCerveja.code-workspace"
   [zshrc]="$HOME/.zshrc"
 )
 
