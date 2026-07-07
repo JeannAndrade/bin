@@ -85,10 +85,11 @@ dotnet new globaljson \
     --output "$SOLUTION" \
     --roll-forward latestMajor
 
-dotnet new web \
-    --no-https \
+dotnet new webapi \
     --framework "$FRAMEWORK" \
-    --output "$PROJECT_PATH"
+    --output "$PROJECT_PATH" \
+    --no-openapi \
+    --use-controllers
 
 dotnet new xunit \
     --framework "$FRAMEWORK" \

@@ -59,7 +59,8 @@ info "Criando solução '$solution_name' com projeto '$project_name'..."
 # Cria o global.json com a versão do SDK
 dotnet new globaljson \
   --sdk-version "$SDK_VERSION" \
-  --output "$solution_name"
+  --output "$solution_name" \
+  --roll-forward latestMajor
 
 # Cria a solução
 dotnet new sln -o "$solution_name"
