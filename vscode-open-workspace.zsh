@@ -33,6 +33,7 @@ require_command code "o comando 'code' não está disponível no PATH."
 # ==============================
 
 IDS=(
+  CodeMaze
   DockerExamples
   JeannandradeGithub
   LearningBlazor
@@ -49,6 +50,7 @@ IDS=(
 # ==============================
 
 typeset -A WORKSPACES=(
+  [CodeMaze]="$HOME/repo/github/CodeMaze/CodeMaze.code-workspace"
   [DockerExamples]="$HOME/repo/gitlab/dockerexamples/dockerexamples.code-workspace"
   [JeannandradeGithub]="$HOME/repo/github/jeannandrade.github.io/jeannandrade.github.io.code-workspace"
   [myscripts]="$HOME/bin/myscripts.code-workspace"
