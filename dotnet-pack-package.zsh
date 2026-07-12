@@ -1,5 +1,26 @@
 #!/usr/bin/env zsh
 
+# =============================================================================
+# Script:   dotnet-pack-package.zsh
+# Autor:    Jeann Andrade
+# Criado:   2026-07-11
+#
+# Descrição:
+#   Empacota um projeto .NET em um pacote NuGet (.nupkg), incluindo os
+#   símbolos de depuração (--include-symbols). A pasta de saída "nupkgs"
+#   é limpa antes de cada execução para evitar pacotes obsoletos.
+#
+# Uso:
+#   ./dotnet-pack-package.zsh <nome-do-projeto>
+#
+# Exemplo:
+#   ./dotnet-pack-package.zsh MinhaLib
+#
+# Dependências:
+#   - shared-style.zsh   (formatação visual: success, info, err, etc.)
+#   - dotnet-common.zsh  (validações: check_dotnet, find_csproj_by_name, etc.)
+# =============================================================================
+
 # Sai imediatamente se algum comando falhar e trata variáveis não definidas como erro
 set -euo pipefail
 clear
