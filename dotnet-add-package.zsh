@@ -1,5 +1,33 @@
 #!/usr/bin/env zsh
 
+# =============================================================================
+# Script:   dotnet-add-package.zsh
+# Autor:    Jeann Andrade
+# Criado:   2026-07-11
+#
+# Descrição:
+#   Adiciona (ou atualiza) um pacote NuGet em um projeto .NET, com checagem
+#   prévia de instalação (avisa se o pacote já estiver referenciado) e
+#   confirmação interativa antes de executar o comando.
+#
+# Uso:
+#   ./dotnet-add-package.zsh <nome_projeto> <nome_package> [versao]
+#
+# Parâmetros:
+#   <nome_projeto>   - Nome do projeto que receberá o pacote
+#   <nome_package>   - Nome do pacote NuGet a ser adicionado
+#   [versao]         - (Opcional) Versão específica do pacote
+#
+# Exemplos:
+#   ./dotnet-add-package.zsh MyApp Newtonsoft.Json
+#   ./dotnet-add-package.zsh MyApp Serilog 3.1.1
+#   ./dotnet-add-package.zsh src/MyApp/MyApp.csproj Serilog.AspNetCore 8.0.0
+#
+# Dependências:
+#   - shared-style.zsh   (formatação visual: section_title, info, print_field, etc.)
+#   - dotnet-common.zsh  (validações: check_dotnet, find_csproj_by_name, etc.)
+# =============================================================================
+
 clear
 
 # Carrega as bibliotecas

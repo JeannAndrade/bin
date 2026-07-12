@@ -49,12 +49,22 @@ nupkg_file=$(find_latest_nupkg)
 
 success "Pacote encontrado: $nupkg_file"
 
+# ---------------------------------------------------------------------------
+# Validação: API key do NuGet definida via variável de ambiente
+# ---------------------------------------------------------------------------
+if [[ -z "${NUGET_API_KEY:-}" ]]; then
+  err "Variável de ambiente NUGET_API_KEY não definida."
+  echo "Defina-a antes de executar este script, por exemplo:" >&2
+  echo "  export NUGET_API_KEY=\"sua-chave-aqui\"" >&2
+  exit 1
+fi
+
 # Executa o dotnet nuget push
-info "Executando: dotnet nuget push \"$nupkg_file\" --api-key <api-key> --source https://api.nuget.org/v3/index.json"
+info "Executando: dotnet nuget push \"$nupkg_file\" --api-key \$NUGET_API_KEY --source https://api.nuget.org/v3/index.json"
 echo ""
 
 dotnet nuget push "$nupkg_file" \
-  --api-key oy2j7droqw2kyo23l7jq5qxxslrjpqwefl2cibhhpyzkd4 \
+  --api-key "$NUGET_API_KEY" \
   --source https://api.nuget.org/v3/index.json
 exit_code=$?
 
