@@ -1,5 +1,24 @@
 #!/usr/bin/env zsh
 
+# =============================================================================
+# Script:   dotnet-update-packages.zsh
+# Autor:    Jeann Andrade
+# Criado:   2026-07-11
+#
+# Descrição:
+#   Verifica pacotes NuGet desatualizados no projeto (via "dotnet list
+#   package --outdated"), monta os comandos "dotnet add package" com a
+#   versão mais recente de cada um e, mediante confirmação, executa todas
+#   as atualizações, seguidas de "dotnet restore" e "dotnet build".
+#
+# Uso:
+#   ./dotnet-update-packages.zsh
+#
+# Dependências:
+#   - shared-style.zsh   (formatação visual: info, warn, success, etc.)
+#   - dotnet-common.zsh  (validações: check_dotnet, etc.)
+# =============================================================================
+
 # Sai imediatamente se algum comando falhar e trata variáveis não definidas como erro
 set -euo pipefail
 clear
@@ -75,14 +94,25 @@ fi
 info "Executando atualizações..."
 echo ""
 
+falhas=()
+
 for cmd in "${comandos[@]}"; do
   info "  $cmd"
-  eval "$cmd"
+  if ! eval "$cmd"; then
+    warn "Falha ao executar: $cmd"
+    falhas+=("$cmd")
+  fi
 done
 
 echo ""
-success "Atualização de pacotes concluída com sucesso."
+if [[ ${#falhas[@]} -gt 0 ]]; then
+  warn "Atualização concluída com ${#falhas[@]} falha(s):"
+  for cmd in "${falhas[@]}"; do
+    warn "  $cmd"
+  done
+else
+  success "Atualização de pacotes concluída com sucesso."
+fi
 
 dotnet restore
 dotnet build
-
