@@ -1,5 +1,31 @@
 #!/usr/bin/env zsh
 
+# =============================================================================
+# Script:   dotnet-add-reference.zsh
+# Autor:    Jeann Andrade
+# Criado:   2026-07-11
+#
+# Descrição:
+#   Adiciona uma referência de projeto (ProjectReference) entre dois
+#   projetos .NET, com checagem prévia de referência já existente e
+#   confirmação interativa antes de executar o comando.
+#
+# Uso:
+#   ./dotnet-add-reference.zsh <projeto_referenciado> <projeto_destino>
+#
+# Parâmetros:
+#   <projeto_referenciado>  - Projeto que SERÁ REFERENCIADO (projA)
+#   <projeto_destino>       - Projeto que RECEBERÁ a referência (projB)
+#
+# Exemplos:
+#   ./dotnet-add-reference.zsh MyLibrary MyApp
+#   ./dotnet-add-reference.zsh src/MyLibrary/MyLibrary.csproj src/MyApp/MyApp.csproj
+#
+# Dependências:
+#   - shared-style.zsh   (formatação visual: section_title, info, print_field, etc.)
+#   - dotnet-common.zsh  (validações: check_dotnet, find_csproj_by_name, require_file, etc.)
+# =============================================================================
+
 clear
 
 # Carrega as bibliotecas
