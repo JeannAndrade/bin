@@ -2,14 +2,16 @@
 
 # ---------------------------------
 # Nome: abrir-workspace-vscode.zsh
-# Versão: 2.2
+# Versão: 2.3
 # Autor: Jeann Andrade
-# Descrição: Abre workspaces do VS Code via menu numerado
+# Descrição: Abre workspaces do VS Code via menu numerado ou por parâmetro
+# Uso: abrir-workspace-vscode.zsh [numero]
+#   Sem parâmetro: exibe o menu numerado e solicita a entrada do usuário.
+#   Com parâmetro: abre diretamente o workspace do índice informado.
 # ---------------------------------
 
 # Sai imediatamente se algum comando falhar e trata variáveis não definidas como erro
 set -euo pipefail
-clear
 
 lib="$(dirname "$0")/shared-style.zsh"
 if [[ ! -f "$lib" ]]; then
@@ -63,21 +65,28 @@ typeset -A WORKSPACES=(
 )
 
 # ==============================
-# MENU NUMERADO
+# OBTÉM A OPÇÃO: PARÂMETRO OU MENU INTERATIVO
 # ==============================
 
-info "Workspaces disponíveis:"
-info "--------------------------"
+if [[ $# -ge 1 ]]; then
+  # Parâmetro informado — pula o menu e usa o valor direto
+  OPCAO="$1"
+else
+  # Nenhum parâmetro — comportamento original (menu numerado)
+  clear
+  info "Workspaces disponíveis:"
+  info "--------------------------"
 
-i=1
-for id in "${IDS[@]}"; do
-  echo " $i) $id"
-  ((i++))
-done
+  i=1
+  for id in "${IDS[@]}"; do
+    echo " $i) $id"
+    ((i++))
+  done
 
-echo
-printf "Digite o número do workspace que deseja abrir: "
-read -r OPCAO
+  echo
+  printf "Digite o número do workspace que deseja abrir: "
+  read -r OPCAO
+fi
 
 # ==============================
 # VALIDAÇÃO
