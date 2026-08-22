@@ -1,5 +1,29 @@
 #!/usr/bin/env zsh
 
+# =============================================================================
+# Script:   dotnet-add-project.zsh
+# Autor:    Jeann Andrade
+# Criado:   2026-07-11
+#
+# Descrição:
+#   Adiciona um novo projeto .NET (web, webapi, classlib, console ou xunit) na
+#   pasta atual, detectando o framework alvo a partir do SDK definido em
+#   "global.json", e o adiciona automaticamente à solution (.slnx)
+#   encontrada na pasta. Projetos "web" e "webapi" são criados com a flag
+#   --no-https.
+#
+# Uso:
+#   ./dotnet-add-project.zsh
+#
+#   O script é interativo: solicita o tipo de projeto (via menu numerado)
+#   e o nome do projeto.
+#
+# Pré-requisitos:
+#   - Um único arquivo .slnx na pasta atual.
+#   - Um arquivo global.json na pasta atual, com o SDK definido.
+#
+# =============================================================================
+
 clear
 
 style_lib="$(dirname "$0")/shared-style.zsh"
