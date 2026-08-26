@@ -1,5 +1,21 @@
 #!/usr/bin/env zsh
 
+# =============================================================================
+# Script:   dotnet-start.zsh
+# Autor:    Jeann Andrade
+# Criado:   2026-07-11
+#
+# Descrição:
+#   Localiza projetos .NET (.csproj) na pasta atual e subpastas, limpa as
+#   pastas bin/obj, executa "dotnet build" e depois "dotnet run" no projeto
+#   encontrado. Se houver apenas um projeto, executa diretamente; se houver
+#   mais de um, exibe um menu numerado para escolha.
+#
+# Uso:
+#   ./dotnet-start.zsh
+#
+# =============================================================================
+
 # Sai imediatamente se algum comando falhar e trata variáveis não definidas como erro
 set -euo pipefail
 clear
@@ -23,6 +39,19 @@ source "$common_lib"
 # ---------------------------------------------------------------------------
 check_dotnet
 
+run_project() {
+  local project="$1"
+
+  info "Limpando as pastas bin e obj dos projetos..."
+  find . -type d \( -name 'bin' -o -name 'obj' \) -prune -exec rm -rf {} +
+
+  info "Compilando projeto: $project"
+  dotnet build "$project"
+
+  info "Executando projeto: $project"
+  dotnet run --project "$project"
+}
+
 # Busca por arquivos .csproj na pasta atual e subpastas
 projects=()
 while IFS= read -r -d $'\0' file; do
@@ -37,7 +66,7 @@ if [ "$n" -eq 0 ]; then
 elif [ "$n" -eq 1 ]; then
   proj="${projects[1]}"
   info "Encontrado 1 projeto: $proj"
-  dotnet run --project "$proj"
+  run_project "$proj"
   exit $?
 else
   info "Foram encontrados $n projetos:"
@@ -59,7 +88,6 @@ else
   done
 
   selected="${projects[$choice]}"
-  info "Executando projeto: $selected"
-  dotnet run --project "$selected"
+  run_project "$selected"
   exit $?
 fi
