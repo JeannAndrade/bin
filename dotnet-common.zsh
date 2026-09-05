@@ -152,3 +152,53 @@ is_valid_numeric_choice() {
   fi
   return 1
 }
+
+# find_and_select_csproj [diretório_raiz] [padrão_exclusão]
+#
+# Busca .csproj recursivamente a partir de diretório_raiz (padrão: .),
+# excluindo os que casam com padrão_exclusão (padrão: '*.Test.csproj').
+# Se houver 1 só, seleciona direto. Se houver mais de 1, exibe menu.
+#
+# Convenção de retorno: valor de saída via variável global SELECTED_PROJECT
+# (só funciona porque este arquivo é consumido via 'source', não execução
+# como processo filho).
+find_and_select_csproj() {
+  local search_root="${1:-.}"
+  local exclude_pattern="${2:-*.Test.csproj}"
+
+  local -a projects
+  while IFS= read -r -d $'\0' file; do
+    projects+=("$file")
+  done < <(find "$search_root" -type f -name '*.csproj' ! -name "$exclude_pattern" -print0)
+
+  local n=${#projects[@]}
+
+  if (( n == 0 )); then
+    err "Nenhum arquivo .csproj encontrado em '$search_root' (excluindo '$exclude_pattern')."
+    return 1
+  elif (( n == 1 )); then
+    info "Encontrado 1 projeto: ${projects[1]}"
+    SELECTED_PROJECT="${projects[1]}"
+    return 0
+  fi
+
+  info "Foram encontrados $n projetos:"
+  local i=1
+  for proj in "${projects[@]}"; do
+    printf "%3d) %s\n" "$i" "$proj"
+    (( i++ ))
+  done
+
+  local choice
+  while true; do
+    printf "Escolha o número do projeto: "
+    read -r choice
+    if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= n )); then
+      break
+    fi
+    warn "Entrada inválida. Tente novamente."
+  done
+
+  SELECTED_PROJECT="${projects[$choice]}"
+  return 0
+}

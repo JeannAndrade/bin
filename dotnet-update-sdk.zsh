@@ -1,5 +1,26 @@
 #!/usr/bin/env zsh
 
+# =============================================================================
+# Script:   dotnet-update-sdk.zsh
+# Autor:    Jeann Andrade
+# Criado:   2026-07-11
+#
+# Descrição:
+#   Atualiza o .NET SDK instalado via feeds nativos do apt (Ubuntu) para a
+#   versão mais recente disponível (dotnet-sdk-*). O processo é feito em
+#   4 etapas: (1) atualiza o índice de pacotes, (2) identifica a versão
+#   mais recente disponível, (3) remove as versões do SDK atualmente
+#   instaladas e (4) instala a nova versão. A remoção antes da instalação
+#   é proposital, para evitar que a limpeza de pacotes antigos derrube a
+#   versão recém-instalada.
+#
+# Uso:
+#   ./dotnet-update-sdk.zsh
+#
+#   Requer privilégios de sudo (apt update/remove/autoremove/install).
+#
+# =============================================================================
+
 # Sai imediatamente se algum comando falhar e trata variáveis não definidas como erro
 set -euo pipefail
 clear
