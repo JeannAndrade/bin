@@ -2,14 +2,17 @@
 
 # =============================================================================
 # Script:   shell-history-run.zsh
-# Versão:   1.0.0
+# Versão:   1.2.0
 # Autor:    Jeann Andrade
 # Criado:   2026-09-09
 #
 # Descrição:
-#   Exibe os últimos 15 comandos do histórico do shell ("history -15"),
-#   permite filtrar o resultado por um termo opcional (grep) e executa
-#   o comando correspondente ao número escolhido.
+#   Exibe os últimos 15 comandos ÚNICOS do histórico do shell (via
+#   "history", excluindo as próprias chamadas ao script e comandos
+#   duplicados, mantendo a ocorrência mais recente de cada um), permite
+#   filtrar o resultado por um termo opcional (grep) e executa o comando
+#   correspondente ao número escolhido, sem resumo adicional depois —
+#   apenas a saída do comando executado.
 #
 # Uso:
 #   shell-history-run.zsh [termo-de-busca]
@@ -51,11 +54,47 @@ require_command grep "Comando 'grep' não encontrado."
 filter_term="${1:-}"
 
 # ---------------------------------------------------------------------------
+# Carregando o histórico do disco
+# ---------------------------------------------------------------------------
+# Um script roda em um processo zsh novo e não-interativo, que começa com a
+# lista de eventos de histórico vazia — "history"/"fc" só enxergam o que foi
+# carregado NESTA sessão, não o histórico do shell interativo que chamou o
+# script. Por isso é preciso carregar o HISTFILE explicitamente com "fc -R"
+# antes de consultar os últimos comandos.
+HISTSIZE=1000
+histfile="${HISTFILE:-$HOME/.zsh_history}"
+
+if [[ ! -f "$histfile" ]]; then
+  err "Arquivo de histórico '$histfile' não encontrado."
+  echo "Se você usa um HISTFILE customizado, exporte a variável antes de executar:" >&2
+  echo "  export HISTFILE=\"/caminho/do/seu/histfile\"" >&2
+  exit 1
+fi
+
+fc -R "$histfile"
+
+# Nomes usados para invocar este próprio script (alias + nome do arquivo),
+# para que essas chamadas não poluam a lista exibida — afinal a função do
+# script é executar comandos passados, não aparecer nele mesmo.
+self_names="hst|shell-history-run\.zsh"
+
+# ---------------------------------------------------------------------------
 # 1. Coletando o histórico recente
 # ---------------------------------------------------------------------------
 section_title "1. Últimos comandos do histórico"
 
-history_output="$(history -15)"
+history_output="$(history | awk -v pat="$self_names" '{
+  line=$0
+  sub(/^[[:space:]]*[0-9]+[[:space:]]+/, "", line)
+  if (line !~ ("^(" pat ")([[:space:]]|$)")) print $0
+}' | tac | awk '{
+  cmd=$0
+  sub(/^[[:space:]]*[0-9]+[[:space:]]+/, "", cmd)
+  if (!(cmd in seen)) {
+    seen[cmd]=1
+    print $0
+  }
+}' | head -15 | tac)"
 
 if [[ -n "$filter_term" ]]; then
   info "Filtrando por: \"$filter_term\""
@@ -106,20 +145,4 @@ print_field "Comando" "$selected_command"
 echo ""
 
 eval "$selected_command"
-exit_code=$?
-
-# ---------------------------------------------------------------------------
-# Resumo final
-# ---------------------------------------------------------------------------
-section_title "Resumo"
-
-print_field "Comando executado" "$selected_command"
-print_field "Código de saída" "$exit_code"
-
-if [[ $exit_code -eq 0 ]]; then
-  success "Comando executado com sucesso."
-else
-  err "Comando finalizado com código de saída $exit_code."
-fi
-
-exit $exit_code
+exit $?
