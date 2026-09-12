@@ -2,17 +2,18 @@
 
 # ---------------------------------
 # Nome: dotnet-update-database.zsh
-# Versão: 1.0
+# Versão: 1.1
 # Autor: Jeann Andrade
 # Descrição: Aplica as migrations pendentes ao banco de dados usando o
 #            Entity Framework Core Tools (dotnet-ef).
-# Uso:       dotnet-update-database.zsh [migration] [--project <path>] [--startup-project <path>] [--connection <string>]
+# Uso:       dotnet-update-database.zsh [migration] [--project <path>] [--startup-project <path>] [--connection <string>] [--context <nome>]
 #            migration            Opcional. Nome da migration alvo. Se omitido,
 #                                 aplica todas as migrations pendentes. Use "0"
 #                                 para reverter todas (voltar ao banco vazio).
 #            --project            Projeto onde ficam as migrations (onde fica o DbContext).
 #            --startup-project    Projeto de inicialização, usado para resolver a connection string.
 #            --connection         Connection string customizada, sobrepõe a do appsettings.
+#            --context            Nome do DbContext a ser usado, quando houver mais de um no projeto.
 #            Permite rodar o script de qualquer diretório, sem precisar
 #            estar dentro da pasta do projeto.
 # ---------------------------------
@@ -43,13 +44,14 @@ check_dotnet
 require_command dotnet-ef "o comando 'dotnet-ef' não está disponível. Instale com: dotnet tool install --global dotnet-ef"
 
 usage() {
-  err "Uso: $(basename "$0") [migration] [--project <path>] [--startup-project <path>] [--connection <string>]"
+  err "Uso: $(basename "$0") [migration] [--project <path>] [--startup-project <path>] [--connection <string>] [--context <nome>]"
 }
 
 TARGET_MIGRATION=""
 PROJECT_PATH=""
 STARTUP_PROJECT_PATH=""
 CONNECTION_STRING=""
+CONTEXT_NAME=""
 
 # O nome da migration (posicional) só é aceito se vier antes das flags e
 # ainda não tiver sido definido.
@@ -80,6 +82,15 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       CONNECTION_STRING="$2"
+      shift 2
+      ;;
+    --context)
+      if [[ $# -lt 2 || -z "${2// }" ]]; then
+        err "A opção --context exige um valor."
+        usage
+        exit 1
+      fi
+      CONTEXT_NAME="$2"
       shift 2
       ;;
     --*)
@@ -121,6 +132,10 @@ if [[ -n "$CONNECTION_STRING" ]]; then
   EF_ARGS+=(--connection "$CONNECTION_STRING")
 fi
 
+if [[ -n "$CONTEXT_NAME" ]]; then
+  EF_ARGS+=(--context "$CONTEXT_NAME")
+fi
+
 if [[ -n "$TARGET_MIGRATION" ]]; then
   section_title "Etapa 1 — Atualizando o banco de dados até '${TARGET_MIGRATION}'"
 else
@@ -146,6 +161,7 @@ print_field "Migration alvo"       "${TARGET_MIGRATION:-(todas as pendentes)}"
 print_field "Projeto"              "${PROJECT_PATH:-(diretório atual)}"
 print_field "Projeto de startup"   "${STARTUP_PROJECT_PATH:-(diretório atual)}"
 print_field "Connection string"    "${CONNECTION_STRING:-(padrão do appsettings)}"
+print_field "DbContext"            "${CONTEXT_NAME:-(não especificado)}"
 
 echo ""
 success "Operação concluída."

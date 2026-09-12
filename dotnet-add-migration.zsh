@@ -2,13 +2,14 @@
 
 # ---------------------------------
 # Nome: dotnet-add-migration.zsh
-# Versão: 1.0
+# Versão: 1.1
 # Autor: Jeann Andrade
 # Descrição: Adiciona uma nova migration usando o Entity Framework Core
 #            Tools (dotnet-ef).
-# Uso:       dotnet-add-migration.zsh <nome-da-migration> [--project <path>] [--startup-project <path>]
+# Uso:       dotnet-add-migration.zsh <nome-da-migration> [--project <path>] [--startup-project <path>] [--context <nome>]
 #            --project           Projeto onde a migration será criada (onde fica o DbContext).
 #            --startup-project   Projeto de inicialização, usado para resolver a connection string.
+#            --context           Nome do DbContext a ser usado, quando houver mais de um no projeto.
 #            Permite rodar o script de qualquer diretório, sem precisar
 #            estar dentro da pasta do projeto.
 # ---------------------------------
@@ -39,7 +40,7 @@ check_dotnet
 require_command dotnet-ef "o comando 'dotnet-ef' não está disponível. Instale com: dotnet tool install --global dotnet-ef"
 
 usage() {
-  err "Uso: $(basename "$0") <nome-da-migration> [--project <path>] [--startup-project <path>]"
+  err "Uso: $(basename "$0") <nome-da-migration> [--project <path>] [--startup-project <path>] [--context <nome>]"
 }
 
 if [[ $# -lt 1 || -z "${1// }" ]]; then
@@ -53,6 +54,7 @@ shift
 
 PROJECT_PATH=""
 STARTUP_PROJECT_PATH=""
+CONTEXT_NAME=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -72,6 +74,15 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       STARTUP_PROJECT_PATH="$2"
+      shift 2
+      ;;
+    --context)
+      if [[ $# -lt 2 || -z "${2// }" ]]; then
+        err "A opção --context exige um valor."
+        usage
+        exit 1
+      fi
+      CONTEXT_NAME="$2"
       shift 2
       ;;
     *)
@@ -96,6 +107,10 @@ if [[ -n "$STARTUP_PROJECT_PATH" ]]; then
   EF_ARGS+=(--startup-project "$STARTUP_PROJECT_PATH")
 fi
 
+if [[ -n "$CONTEXT_NAME" ]]; then
+  EF_ARGS+=(--context "$CONTEXT_NAME")
+fi
+
 section_title "Etapa 1 — Adicionando migration '${MIGRATION_NAME}'"
 info "Executando: dotnet ef ${EF_ARGS[*]}"
 
@@ -115,6 +130,7 @@ section_title "Resumo"
 print_field "Migration"          "$MIGRATION_NAME"
 print_field "Projeto"            "${PROJECT_PATH:-(diretório atual)}"
 print_field "Projeto de startup" "${STARTUP_PROJECT_PATH:-(diretório atual)}"
+print_field "DbContext"          "${CONTEXT_NAME:-(não especificado)}"
 
 echo ""
 success "Operação concluída."
