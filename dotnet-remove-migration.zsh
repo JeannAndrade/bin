@@ -2,13 +2,14 @@
 
 # ---------------------------------
 # Nome: dotnet-remove-migration.zsh
-# Versão: 1.0
+# Versão: 1.1
 # Autor: Jeann Andrade
 # Descrição: Remove a última migration usando o Entity Framework Core
 #            Tools (dotnet-ef).
-# Uso:       dotnet-remove-migration.zsh [--project <path>] [--startup-project <path>] [--force]
+# Uso:       dotnet-remove-migration.zsh [--project <path>] [--startup-project <path>] [--context <nome>] [--force]
 #            --project           Projeto onde a migration será removida (onde fica o DbContext).
 #            --startup-project   Projeto de inicialização, usado para resolver a connection string.
+#            --context           Nome do DbContext a ser usado, quando houver mais de um no projeto.
 #            --force             Reverte a migration no banco de dados, se já tiver sido aplicada.
 #            Permite rodar o script de qualquer diretório, sem precisar
 #            estar dentro da pasta do projeto.
@@ -40,11 +41,12 @@ check_dotnet
 require_command dotnet-ef "o comando 'dotnet-ef' não está disponível. Instale com: dotnet tool install --global dotnet-ef"
 
 usage() {
-  err "Uso: $(basename "$0") [--project <path>] [--startup-project <path>] [--force]"
+  err "Uso: $(basename "$0") [--project <path>] [--startup-project <path>] [--context <nome>] [--force]"
 }
 
 PROJECT_PATH=""
 STARTUP_PROJECT_PATH=""
+CONTEXT_NAME=""
 FORCE_FLAG=false
 
 while [[ $# -gt 0 ]]; do
@@ -65,6 +67,15 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       STARTUP_PROJECT_PATH="$2"
+      shift 2
+      ;;
+    --context)
+      if [[ $# -lt 2 || -z "${2// }" ]]; then
+        err "A opção --context exige um valor."
+        usage
+        exit 1
+      fi
+      CONTEXT_NAME="$2"
       shift 2
       ;;
     --force)
@@ -93,6 +104,10 @@ if [[ -n "$STARTUP_PROJECT_PATH" ]]; then
   EF_ARGS+=(--startup-project "$STARTUP_PROJECT_PATH")
 fi
 
+if [[ -n "$CONTEXT_NAME" ]]; then
+  EF_ARGS+=(--context "$CONTEXT_NAME")
+fi
+
 if [[ "$FORCE_FLAG" == true ]]; then
   EF_ARGS+=(--force)
 fi
@@ -116,6 +131,7 @@ section_title "Resumo"
 
 print_field "Projeto"            "${PROJECT_PATH:-(diretório atual)}"
 print_field "Projeto de startup" "${STARTUP_PROJECT_PATH:-(diretório atual)}"
+print_field "DbContext"          "${CONTEXT_NAME:-(não especificado)}"
 print_field "Force"              "$FORCE_FLAG"
 
 echo ""

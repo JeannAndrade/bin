@@ -1,16 +1,15 @@
 #!/usr/bin/env zsh
 
 # ---------------------------------
-# Nome: dotnet-remove-migration.zsh
+# Nome: dotnet-add-migration.zsh
 # Versão: 1.1
 # Autor: Jeann Andrade
-# Descrição: Remove a última migration usando o Entity Framework Core
+# Descrição: Adiciona uma nova migration usando o Entity Framework Core
 #            Tools (dotnet-ef).
-# Uso:       dotnet-remove-migration.zsh [--project <path>] [--startup-project <path>] [--context <nome>] [--force]
-#            --project           Projeto onde a migration será removida (onde fica o DbContext).
+# Uso:       dotnet-add-migration.zsh <nome-da-migration> [--project <path>] [--startup-project <path>] [--context <nome>]
+#            --project           Projeto onde a migration será criada (onde fica o DbContext).
 #            --startup-project   Projeto de inicialização, usado para resolver a connection string.
 #            --context           Nome do DbContext a ser usado, quando houver mais de um no projeto.
-#            --force             Reverte a migration no banco de dados, se já tiver sido aplicada.
 #            Permite rodar o script de qualquer diretório, sem precisar
 #            estar dentro da pasta do projeto.
 # ---------------------------------
@@ -41,13 +40,21 @@ check_dotnet
 require_command dotnet-ef "o comando 'dotnet-ef' não está disponível. Instale com: dotnet tool install --global dotnet-ef"
 
 usage() {
-  err "Uso: $(basename "$0") [--project <path>] [--startup-project <path>] [--context <nome>] [--force]"
+  err "Uso: $(basename "$0") <nome-da-migration> [--project <path>] [--startup-project <path>] [--context <nome>]"
 }
+
+if [[ $# -lt 1 || -z "${1// }" ]]; then
+  err "Nome da migration não informado."
+  usage
+  exit 1
+fi
+
+MIGRATION_NAME="$1"
+shift
 
 PROJECT_PATH=""
 STARTUP_PROJECT_PATH=""
 CONTEXT_NAME=""
-FORCE_FLAG=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -78,10 +85,6 @@ while [[ $# -gt 0 ]]; do
       CONTEXT_NAME="$2"
       shift 2
       ;;
-    --force)
-      FORCE_FLAG=true
-      shift
-      ;;
     *)
       err "Opção desconhecida: $1"
       usage
@@ -91,10 +94,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 # ==============================
-# ETAPA 1 — REMOVER ÚLTIMA MIGRATION
+# ETAPA 1 — ADICIONAR MIGRATION
 # ==============================
 
-EF_ARGS=(migrations remove)
+EF_ARGS=(migrations add "$MIGRATION_NAME")
 
 if [[ -n "$PROJECT_PATH" ]]; then
   EF_ARGS+=(--project "$PROJECT_PATH")
@@ -108,20 +111,15 @@ if [[ -n "$CONTEXT_NAME" ]]; then
   EF_ARGS+=(--context "$CONTEXT_NAME")
 fi
 
-if [[ "$FORCE_FLAG" == true ]]; then
-  EF_ARGS+=(--force)
-fi
-
-section_title "Etapa 1 — Removendo a última migration"
+section_title "Etapa 1 — Adicionando migration '${MIGRATION_NAME}'"
 info "Executando: dotnet ef ${EF_ARGS[*]}"
 
 if ! dotnet ef "${EF_ARGS[@]}"; then
-  err "Falha ao remover a migration."
-  err "Se ela já foi aplicada ao banco de dados, use a opção --force."
+  err "Falha ao adicionar a migration '${MIGRATION_NAME}'."
   exit 1
 fi
 
-success "Migration removida com sucesso."
+success "Migration '${MIGRATION_NAME}' adicionada com sucesso."
 
 # ==============================
 # RESUMO FINAL
@@ -129,10 +127,10 @@ success "Migration removida com sucesso."
 
 section_title "Resumo"
 
+print_field "Migration"          "$MIGRATION_NAME"
 print_field "Projeto"            "${PROJECT_PATH:-(diretório atual)}"
 print_field "Projeto de startup" "${STARTUP_PROJECT_PATH:-(diretório atual)}"
 print_field "DbContext"          "${CONTEXT_NAME:-(não especificado)}"
-print_field "Force"              "$FORCE_FLAG"
 
 echo ""
 success "Operação concluída."
