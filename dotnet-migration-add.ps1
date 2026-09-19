@@ -29,10 +29,10 @@
     Versão: 1.1 (convertido de dotnet-add-migration.zsh)
 
 .EXAMPLE
-    ./dotnet-add-migration.ps1 AddCustomerTable
+    ./dotnet-migration-add.ps1 AddCustomerTable
 
 .EXAMPLE
-    ./dotnet-add-migration.ps1 AddCustomerTable -Project src/Infra -StartupProject src/Api
+    ./dotnet-migration-add.ps1 AddCustomerTable -Project src/Infra -StartupProject src/Api
 #>
 
 param(
