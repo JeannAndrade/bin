@@ -2,14 +2,19 @@
 
 # =============================================================================
 # Script:   dotnet-start.zsh
+# Versão:   1.1
 # Autor:    Jeann Andrade
 # Criado:   2026-07-11
 #
 # Descrição:
-#   Localiza projetos .NET (.csproj) na pasta atual e subpastas, limpa as
-#   pastas bin/obj, executa "dotnet build" e depois "dotnet run" no projeto
-#   encontrado. Se houver apenas um projeto, executa diretamente; se houver
-#   mais de um, exibe um menu numerado para escolha.
+#   Localiza projetos .NET executáveis (Service ou Presentation, seguindo
+#   a arquitetura em camadas da solution) na pasta atual e subpastas, limpa
+#   as pastas bin/obj, executa "dotnet build" e depois "dotnet run" no
+#   projeto encontrado. Se houver apenas um projeto, executa diretamente;
+#   se houver mais de um, exibe um menu numerado para escolha.
+#
+#   Projetos de biblioteca (Application, Persistence, Domain, etc.) e de
+#   teste não são considerados, pois não são executáveis.
 #
 # Uso:
 #   ./dotnet-start.zsh
@@ -52,16 +57,22 @@ run_project() {
   dotnet run --project "$project"
 }
 
-# Busca por arquivos .csproj na pasta atual e subpastas
+# Busca apenas projetos executáveis: Service.csproj / *.Service.csproj (API)
+# e Presentation.csproj / *.Presentation.csproj (Web). Projetos de biblioteca
+# (Application, Persistence, Domain, etc.) e de teste ficam automaticamente
+# de fora, pois não seguem esses nomes/sufixos.
 projects=()
 while IFS= read -r -d $'\0' file; do
   projects+=("$file")
-done < <(find . -type f -name '*.csproj' -print0)
+done < <(find . -type f \( \
+    -name 'Service.csproj' -o -name '*.Service.csproj' \
+    -o -name 'Presentation.csproj' -o -name '*.Presentation.csproj' \
+  \) -print0)
 
 n=${#projects[@]}
 
 if [ "$n" -eq 0 ]; then
-  err "Nenhum arquivo .csproj encontrado neste diretório."
+  err "Nenhum projeto executável (Service ou Presentation) encontrado neste diretório."
   exit $?
 elif [ "$n" -eq 1 ]; then
   proj="${projects[1]}"
@@ -69,7 +80,7 @@ elif [ "$n" -eq 1 ]; then
   run_project "$proj"
   exit $?
 else
-  info "Foram encontrados $n projetos:"
+  info "Foram encontrados $n projetos executáveis:"
   i=1
   for proj in "${projects[@]}"; do
     printf "%3d) %s\n" "$i" "$proj"
