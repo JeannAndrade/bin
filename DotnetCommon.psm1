@@ -3,26 +3,36 @@
     Equivalente PowerShell de dotnet-common.zsh.
 
 .DESCRIPTION
-    Helpers compartilhados de validação para os scripts .NET.
-    Por enquanto só traz o que dotnet-start.ps1 precisa (equivalente a
-    check_dotnet); as demais funções de dotnet-common.zsh entram aqui
-    conforme formos convertendo os outros scripts.
+    Helpers compartilhados de validação para os scripts .NET e Git.
 
 .NOTES
     Carregue via: Import-Module "$PSScriptRoot/DotnetCommon.psm1"
 #>
 
+function Assert-CommandAvailable {
+    <#
+    .SYNOPSIS
+        Equivalente a require_command() do zsh: garante que um comando
+        está disponível no PATH, com mensagem de erro customizável.
+    #>
+    param(
+        [Parameter(Mandatory)][string]$Command,
+        [string]$Message = "o comando '$Command' não está disponível no PATH."
+    )
+    if (-not (Get-Command $Command -ErrorAction SilentlyContinue)) {
+        Write-ErrMessage $Message
+        exit 1
+    }
+}
+
 function Assert-DotnetCli {
-  <#
+    <#
     .SYNOPSIS
         Equivalente a check_dotnet() do zsh: garante que 'dotnet' está no
         PATH e imprime a versão encontrada.
     #>
-  if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    Write-ErrMessage "O comando 'dotnet' não foi encontrado."
-    exit 1
-  }
-  Write-InfoMessage "dotnet SDK encontrado: $(dotnet --version)"
+    Assert-CommandAvailable -Command 'dotnet' -Message "O comando 'dotnet' não foi encontrado."
+    Write-InfoMessage "dotnet SDK encontrado: $(dotnet --version)"
 }
 
-Export-ModuleMember -Function Assert-DotnetCli
+Export-ModuleMember -Function Assert-CommandAvailable, Assert-DotnetCli
