@@ -35,4 +35,32 @@ function Assert-DotnetCli {
     Write-InfoMessage "dotnet SDK encontrado: $(dotnet --version)"
 }
 
-Export-ModuleMember -Function Assert-CommandAvailable, Assert-DotnetCli
+function Find-CsprojByName {
+    <#
+    .SYNOPSIS
+        Equivalente a find_csproj_by_name() do zsh: procura um .csproj com
+        o nome exato informado (recursivamente, a partir do diretório
+        atual) e retorna o caminho encontrado, ou encerra com erro.
+
+    .PARAMETER Name
+        Nome do projeto, com ou sem a extensão ".csproj".
+    #>
+    param([Parameter(Mandatory)][string]$Name)
+
+    # Get-ChildItem -Filter já resolve por nome de arquivo sem precisar de
+    # find + head -n 1 como no zsh; -ErrorAction SilentlyContinue evita que
+    # caminhos sem permissão de leitura interrompam a busca.
+    $fileName = if ($Name -like '*.csproj') { $Name } else { "$Name.csproj" }
+
+    $result = Get-ChildItem -Path . -Recurse -File -Filter $fileName -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+
+    if (-not $result) {
+        Write-ErrMessage "Arquivo '$fileName' não encontrado."
+        exit 1
+    }
+
+    return $result.FullName
+}
+
+Export-ModuleMember -Function Assert-CommandAvailable, Assert-DotnetCli, Find-CsprojByName
