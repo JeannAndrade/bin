@@ -63,4 +63,43 @@ function Find-CsprojByName {
     return $result.FullName
 }
 
-Export-ModuleMember -Function Assert-CommandAvailable, Assert-DotnetCli, Find-CsprojByName
+function Assert-DirectoryExists {
+    <#
+    .SYNOPSIS
+        Equivalente a require_dir() do zsh: garante que um diretório
+        existe, com mensagem de erro customizável.
+    #>
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [string]$Message = "Diretório '$Path' não encontrado."
+    )
+    if (-not (Test-Path -Path $Path -PathType Container)) {
+        Write-ErrMessage $Message
+        exit 1
+    }
+}
+
+function Find-LatestNupkg {
+    <#
+    .SYNOPSIS
+        Equivalente a find_latest_nupkg() do zsh: retorna o .nupkg mais
+        recente (por data de modificação) dentro da pasta "nupkgs",
+        excluindo pacotes de símbolos (*.symbols.nupkg).
+    #>
+    param([string]$Directory = 'nupkgs')
+
+    $result = Get-ChildItem -Path $Directory -File -Filter '*.nupkg' -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -notlike '*.symbols.nupkg' } |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 1
+
+    if (-not $result) {
+        Write-ErrMessage "Nenhum arquivo .nupkg encontrado em ./$Directory"
+        exit 1
+    }
+
+    return $result.FullName
+}
+
+Export-ModuleMember -Function Assert-CommandAvailable, Assert-DotnetCli, Find-CsprojByName, `
+    Assert-DirectoryExists, Find-LatestNupkg
