@@ -154,5 +154,36 @@ function Find-AndSelectCsproj {
     return $projects[[int]$choice - 1].FullName
 }
 
+function Get-FrameworkFromSdk {
+    <#
+    .SYNOPSIS
+        Equivalente a framework_from_sdk() do zsh: deriva o TFM (target
+        framework moniker, ex.: "net10.0") a partir de uma versão de SDK.
+
+    .PARAMETER SdkVersion
+        Versão do SDK, no formato "major.minor.patch" (ex.: "10.0.100").
+
+    .PARAMETER Mode
+        "major_minor" usa major e minor da versão do SDK (ex.: 8.0.4xx ->
+        net8.0). "major_zero" força o minor como zero (ex.: 10.0.1xx ->
+        net10.0), usado quando se quer sempre a primeira versão da major.
+    #>
+    param(
+        [Parameter(Mandatory)][string]$SdkVersion,
+        [ValidateSet('major_minor', 'major_zero')]
+        [string]$Mode = 'major_minor'
+    )
+
+    $parts = $SdkVersion -split '\.'
+    $major = $parts[0]
+    $minor = if ($parts.Count -gt 1) { $parts[1] } else { '0' }
+
+    if ($Mode -eq 'major_zero') {
+        return "net$major.0"
+    }
+
+    return "net$major.$minor"
+}
+
 Export-ModuleMember -Function Assert-CommandAvailable, Assert-DotnetCli, Find-CsprojByName, `
-    Assert-DirectoryExists, Find-LatestNupkg, Find-AndSelectCsproj
+    Assert-DirectoryExists, Find-LatestNupkg, Find-AndSelectCsproj, Get-FrameworkFromSdk
