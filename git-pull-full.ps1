@@ -12,7 +12,7 @@
     Versão: 1.0 (convertido de git-full-pull.zsh)
 
 .EXAMPLE
-    ./git-full-pull.ps1
+    ./git-pull-full.ps1
 #>
 
 $ErrorActionPreference = 'Stop'

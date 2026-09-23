@@ -27,7 +27,7 @@
     Requer: Ubuntu/Debian (apt, apt-cache, dpkg-query), dotnet SDK instalado, sudo
 
 .EXAMPLE
-    ./dotnet-check-sdk-update.ps1
+    ./dotnet-sdk-update-check.ps1
 #>
 
 $ErrorActionPreference = 'Stop'

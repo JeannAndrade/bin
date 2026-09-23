@@ -23,7 +23,7 @@
     Versão: 1.0 (convertido de dotnet-update-packages.zsh)
 
 .EXAMPLE
-    ./dotnet-update-packages.ps1
+    ./dotnet-packages-update.ps1
 #>
 
 $ErrorActionPreference = 'Stop'

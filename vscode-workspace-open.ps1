@@ -24,8 +24,8 @@
     Versão: 2.3 (convertido de vscode-open-workspace.zsh / abrir-workspace-vscode.zsh)
 
 .EXAMPLE
-    ./vscode-open-workspace.ps1
-    ./vscode-open-workspace.ps1 3
+    ./vscode-workspace-open.ps1
+    ./vscode-workspace-open.ps1 3
 #>
 
 param(

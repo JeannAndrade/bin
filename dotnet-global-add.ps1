@@ -22,7 +22,7 @@
     especial.
 
 .EXAMPLE
-    ./dotnet-add-global.ps1
+    ./dotnet-global-add.ps1
 #>
 
 $ErrorActionPreference = 'Stop'

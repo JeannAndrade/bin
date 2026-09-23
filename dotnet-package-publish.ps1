@@ -22,7 +22,7 @@
     O caminho fixo "/home/jeann/NuGetPackages" da versão zsh foi trocado
     por Join-Path $HOME 'NuGetPackages', para que o script funcione tanto
     em Linux/WSL quanto em outros sistemas onde o PowerShell rode
-    (mesma abordagem usada em vscode-open-workspace.ps1).
+    (mesma abordagem usada em vscode-workspace-open.ps1).
 
     Depende de Assert-DirectoryExists e Find-LatestNupkg em
     DotnetCommon.psm1 (equivalentes a require_dir() e
@@ -30,7 +30,7 @@
 
 .EXAMPLE
     $env:NUGET_API_KEY = "sua-chave-aqui"
-    ./dotnet-publish-package.ps1
+    ./dotnet-package-publish.ps1
 #>
 
 $ErrorActionPreference = 'Stop'

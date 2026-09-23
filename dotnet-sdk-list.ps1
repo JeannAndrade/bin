@@ -12,7 +12,7 @@
     Versão: 1.0 (convertido de dotnet-sdks.zsh)
 
 .EXAMPLE
-    ./dotnet-sdks.ps1
+    ./dotnet-sdks-get.ps1
 #>
 
 $ErrorActionPreference = 'Stop'

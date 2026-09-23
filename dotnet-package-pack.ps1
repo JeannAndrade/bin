@@ -23,7 +23,7 @@
     (equivalente a find_csproj_by_name() do dotnet-common.zsh).
 
 .EXAMPLE
-    ./dotnet-pack-package.ps1 MinhaLib
+    ./dotnet-package-pack.ps1 MinhaLib
 #>
 
 param(

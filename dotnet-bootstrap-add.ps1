@@ -32,7 +32,7 @@
     (equivalente a find_and_select_csproj() do dotnet-common.zsh).
 
 .EXAMPLE
-    ./dotnet-add-bootstrap.ps1
+    ./dotnet-bootstrap-add.ps1
 #>
 
 $ErrorActionPreference = 'Stop'
