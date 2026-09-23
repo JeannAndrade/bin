@@ -101,5 +101,58 @@ function Find-LatestNupkg {
     return $result.FullName
 }
 
+function Find-AndSelectCsproj {
+    <#
+    .SYNOPSIS
+        Equivalente a find_and_select_csproj() do zsh: busca .csproj
+        recursivamente a partir de $SearchRoot, excluindo os que casam com
+        $ExcludePattern. Se houver só um, retorna direto; se houver mais
+        de um, exibe um menu numerado para escolha.
+
+    .NOTES
+        No zsh, o valor selecionado saía por uma variável global
+        (SELECTED_PROJECT), truque necessário porque o script era
+        "sourced" e não podia usar um valor de retorno de função de
+        forma direta. Em PowerShell isso não é necessário: a função
+        simplesmente retorna o caminho (ou $null, se nada for
+        encontrado), e quem chama decide o que fazer.
+    #>
+    param(
+        [string]$SearchRoot = '.',
+        [string]$ExcludePattern = '*.Test.csproj'
+    )
+
+    $projects = @(
+        Get-ChildItem -Path $SearchRoot -Recurse -File -Filter '*.csproj' -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -notlike $ExcludePattern }
+    )
+
+    $n = $projects.Count
+
+    if ($n -eq 0) {
+        Write-ErrMessage "Nenhum arquivo .csproj encontrado em '$SearchRoot' (excluindo '$ExcludePattern')."
+        return $null
+    }
+    elseif ($n -eq 1) {
+        Write-InfoMessage "Encontrado 1 projeto: $($projects[0].FullName)"
+        return $projects[0].FullName
+    }
+
+    Write-InfoMessage "Foram encontrados $n projetos:"
+    for ($i = 0; $i -lt $n; $i++) {
+        Write-Host ("{0,3}) {1}" -f ($i + 1), $projects[$i].FullName)
+    }
+
+    while ($true) {
+        $choice = Read-Host "Escolha o número do projeto"
+        if ($choice -match '^\d+$' -and [int]$choice -ge 1 -and [int]$choice -le $n) {
+            break
+        }
+        Write-WarnMessage "Entrada inválida. Tente novamente."
+    }
+
+    return $projects[[int]$choice - 1].FullName
+}
+
 Export-ModuleMember -Function Assert-CommandAvailable, Assert-DotnetCli, Find-CsprojByName, `
-    Assert-DirectoryExists, Find-LatestNupkg
+    Assert-DirectoryExists, Find-LatestNupkg, Find-AndSelectCsproj
