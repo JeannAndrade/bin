@@ -15,6 +15,9 @@
     Versão: 1.0 (convertido de dotnet-ef-tools-install.zsh, antigo
              dotnet-install-ef-tools.zsh)
 
+    Depende de Test-DotnetToolInstalled e Get-InstalledDotnetToolVersion
+    em DotnetCommon.psm1 (compartilhadas com dotnet-libman-tools-install.ps1).
+
 .EXAMPLE
     ./dotnet-ef-tools-install.ps1
 #>
@@ -57,14 +60,8 @@ Assert-DotnetCli
 
 Write-SectionTitle "Etapa 1 — Verificando instalação existente"
 
-# "dotnet tool list --global" emite uma tabela texto; assim como no zsh
-# (que usava awk + grep -qx), procuramos a linha cuja primeira coluna
-# bate exatamente com o nome da ferramenta.
-$toolListOutput = dotnet tool list --global
-$matchedRow = $toolListOutput | Where-Object { ($_ -split '\s+')[0] -eq $toolName }
-
-if ($matchedRow) {
-  $installedVersion = ($matchedRow -split '\s+')[1]
+if (Test-DotnetToolInstalled -ToolId $toolName) {
+  $installedVersion = Get-InstalledDotnetToolVersion -ToolId $toolName
   Write-InfoMessage "'${toolName}' já está instalada globalmente (versão ${installedVersion})."
   Write-InfoMessage "Atualizando para a versão mais recente..."
 

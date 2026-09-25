@@ -185,5 +185,38 @@ function Get-FrameworkFromSdk {
     return "net$major.$minor"
 }
 
+function Test-DotnetToolInstalled {
+    <#
+    .SYNOPSIS
+        Verifica se uma dotnet tool está instalada globalmente, comparando
+        o nome de forma case-insensitive.
+
+    .DESCRIPTION
+        Generaliza a checagem que existia duplicada em scripts zsh
+        distintos (grep -qi "$TOOL_ID" / awk -v pkg="${TOOL_ID:l}"): tanto
+        dotnet-ef-tools-install.zsh quanto dotnet-libman-tools-install.zsh
+        faziam essa mesma verificação, cada um a seu jeito.
+    #>
+    param([Parameter(Mandatory)][string]$ToolId)
+    $output = dotnet tool list --global 2>$null
+    return [bool]($output | Where-Object { ($_ -split '\s+')[0] -ieq $ToolId })
+}
+
+function Get-InstalledDotnetToolVersion {
+    <#
+    .SYNOPSIS
+        Retorna a versão instalada de uma dotnet tool global, ou $null se
+        ela não estiver instalada.
+    #>
+    param([Parameter(Mandatory)][string]$ToolId)
+    $output = dotnet tool list --global 2>$null
+    $row = $output | Where-Object { ($_ -split '\s+')[0] -ieq $ToolId }
+    if ($row) {
+        return ($row -split '\s+')[1]
+    }
+    return $null
+}
+
 Export-ModuleMember -Function Assert-CommandAvailable, Assert-DotnetCli, Find-CsprojByName, `
-    Assert-DirectoryExists, Find-LatestNupkg, Find-AndSelectCsproj, Get-FrameworkFromSdk
+    Assert-DirectoryExists, Find-LatestNupkg, Find-AndSelectCsproj, Get-FrameworkFromSdk, `
+    Test-DotnetToolInstalled, Get-InstalledDotnetToolVersion
