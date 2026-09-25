@@ -217,6 +217,76 @@ function Get-InstalledDotnetToolVersion {
     return $null
 }
 
+function Find-SingleGlob {
+    <#
+    .SYNOPSIS
+        Equivalente a require_single_glob() do zsh: garante que exista
+        exatamente um arquivo casando com o padrão informado na pasta
+        atual (sem descer em subpastas) e retorna o nome do arquivo.
+    #>
+    param(
+        [Parameter(Mandatory)][string]$Pattern,
+        [string]$MessageZero = "Nenhum arquivo encontrado para padrão: $Pattern",
+        [string]$MessageMany = "Mais de um arquivo encontrado para padrão: $Pattern"
+    )
+
+    $files = @(Get-ChildItem -Path . -File -Filter $Pattern -ErrorAction SilentlyContinue)
+
+    if ($files.Count -eq 0) {
+        Write-ErrMessage $MessageZero
+        exit 1
+    }
+
+    if ($files.Count -gt 1) {
+        Write-ErrMessage $MessageMany
+        foreach ($f in $files) {
+            Write-Host "  - $($f.Name)"
+        }
+        exit 1
+    }
+
+    return $files[0].Name
+}
+
+function Assert-FileExists {
+    <#
+    .SYNOPSIS
+        Equivalente a require_file() do zsh: garante que um arquivo
+        existe, com mensagem de erro customizável.
+    #>
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [string]$Message = "Arquivo '$Path' não encontrado."
+    )
+    if (-not (Test-Path -Path $Path -PathType Leaf)) {
+        Write-ErrMessage $Message
+        exit 1
+    }
+}
+
+function Get-SdkFromGlobalJson {
+    <#
+    .SYNOPSIS
+        Equivalente a extract_sdk_from_global_json() do zsh: lê a versão
+        do SDK definida em um global.json.
+    #>
+    param([string]$Path = 'global.json')
+
+    if (-not (Test-Path -Path $Path -PathType Leaf)) {
+        Write-ErrMessage "Arquivo $Path não encontrado."
+        exit 1
+    }
+
+    $content = Get-Content -Path $Path -Raw
+    if ($content -match '"version"\s*:\s*"(\d+\.\d+\.\d+)"') {
+        return $Matches[1]
+    }
+
+    Write-ErrMessage "Não foi possível extrair a versão do SDK do $Path."
+    exit 1
+}
+
 Export-ModuleMember -Function Assert-CommandAvailable, Assert-DotnetCli, Find-CsprojByName, `
     Assert-DirectoryExists, Find-LatestNupkg, Find-AndSelectCsproj, Get-FrameworkFromSdk, `
-    Test-DotnetToolInstalled, Get-InstalledDotnetToolVersion
+    Test-DotnetToolInstalled, Get-InstalledDotnetToolVersion, Find-SingleGlob, `
+    Assert-FileExists, Get-SdkFromGlobalJson
